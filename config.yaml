@@ -11,7 +11,8 @@ table_pass:
     "city_station": ["子站","作战部"]
     "cms_tz": ["ID","BD推荐人","邀请人ID"]
 table_month: 
-    "up_to_standard_sale": []
+    "tz_base": ["团长ID","TC仓","蜂窝","城市圈"]
+    "tz_day_sale": []
     "tz_month_sale": []
     "city_station": []
     "cms_tz": []
