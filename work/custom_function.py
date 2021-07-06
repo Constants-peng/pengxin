@@ -8,7 +8,7 @@ import numpy as np
 import threading
 from queue import Queue
 # import ipynb_importer
-from get_1688.config import get_mysql_cfg, get_table_cfg, cfg
+from config import get_mysql_cfg, get_table_cfg, cfg
 
 
 createVar, timeday, sql_queue = locals(), time.localtime(), Queue()

@@ -1,7 +1,7 @@
 from typing import Tuple,List
 from collections import Iterable
 import datetime
-from get_1688.custom_function import *
+from custom_function import *
 
 # 全局变量分化 此处可以修改全局变量的值 请不要直接修改或者删除createVar 变量
 df_tz_day_sale, df_cms_tz, df_tz_base, df_tz_month_sale, df_city_station = (

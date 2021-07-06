@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-import ipynb_importer
+# import ipynb_importer
 from config import get_redis_pool
 import threading
 import re
