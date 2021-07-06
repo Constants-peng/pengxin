@@ -1,0 +1,20 @@
+redis:
+    host: 'localhost'
+    port: 6379
+    decode_responses: True
+    socket_connect_timeout: 60
+test_mysql_cfg: "mysql+pymysql://pengxin:123456@localhost:3306/work_data"
+public_mysql_cfg: "mysql+pymysql://root:123456@localhost:3306/work_data"
+table_pass: 
+    "up_to_standard_sale": ["作战部","战区","主站","子站","团长id","首单日期","下单日期","nmv","下单用户数","销售件数","团长佣金"]
+    "tz_base": ["团长ID","TC仓","蜂窝","城市圈"]
+    "city_station": ["子站","作战部"]
+    "cms_tz": ["ID","BD推荐人","邀请人ID"]
+table_month: 
+    "tz_base": ["团长ID","TC仓","蜂窝","城市圈"]
+    "tz_day_sale": []
+    "tz_month_sale": []
+    "city_station": []
+    "cms_tz": []
+
+
