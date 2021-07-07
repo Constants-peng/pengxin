@@ -1,9 +1,10 @@
 import pandas as pd
 import re
 import numpy as np
-from typing import List
+from typing import List, Iterable
+import os
 import pymysql
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine,exc
 
 pd.set_option('display.max_columns', None)
 con = create_engine('mysql+pymysql://pengxin:123456@localhost:3306/work_data?charset=utf8mb4')
@@ -32,7 +33,7 @@ def need_dtype(df: pd.core.frame.DataFrame):
                 r'((19[7-9]\d{1})|((201[0-9])|202[0-2]))[-/]?((0[1-9])|(1[0-2]))[-/]?((0[1-9])|(1[0-9])|(2[0-9])|(3[0-1]))?', str(order_name), re.I) else False)
             if df[df[flag]].shape[0] > df.shape[0] * 0.6:
                 df[col_name] = pd.to_datetime(
-                    df[col_name].apply(lambda x: str(x)), errors='ignore')
+                    df[col_name].apply(lambda x: str(x)), errors='coerce')
                 df.drop(columns=[flag], inplace=True)
                 continue
             df[col_name] = pd.to_numeric(
@@ -59,17 +60,33 @@ def truncate_table(db_table_list: List):
     db.close()
 
 
-truncate_table(['work_data.tz_month_sale', 'work_data.tz_base', 'work_data.tz_day_sale'])  # 传入一个列表,为了不改变原表数据结构,选择清空表
-# 所有的表都以append方式入库,不允许以replace的方式入库
-df_cms_tz = pd.read_excel(r"E:\钉钉excel文件\0706\tz_base_20210706_14_55_05.xlsx")  # 读取cms表
-cms_tz_temp = dropna_col(df_cms_tz)
-cms_tz_temp = need_dtype(cms_tz_temp)
-cms_tz_temp.drop_duplicates(subset='ID').to_sql('cms_tz', con=con, if_exists='append', index=False)  # 将当前对象存入数据库
+def read_file(file_path: Iterable):
+    # 所有的表都以append方式入库,不允许以replace的方式入库
+    for file in file_path:
+        df = pd.read_excel(file)
+        df = dropna_col(df)
+        df = need_dtype(df)
+        print(file)
+        try:               #此处建议用pymysql来操作插入语句
+            # if "day" in file:
+            #     df.to_sql("tz_day_sale", con=con, if_exists="append", index=False)
+            # elif "cms" in file:
+            #     df.drop_duplicates(subset='ID').to_sql('cms_tz', con=con, if_exists='append', index=False)  # 将当前对象存入数据库
+            if "month" in file:
+                df.drop_duplicates(subset='团长用户ID').to_sql("tz_month_base", con=con, if_exists="append", index=False)
+            elif "message" in file:
+                df.drop_duplicates(subset='团长id').to_sql("tz_message", con=con, if_exists="append", index=False)
+        except exc.IntegrityError as e:
+            print(str(e))
+ # 将目录下的文件名添加到file_list列表中
+def file_name_walk(file_dir):
+    file_list = []
+    for root, dirs, files in os.walk(file_dir):
+        for file_name in files:
+            file_list.append(os.path.join(root, file_name))
+    return file_list
 
-df_tz_month_base = pd.read_excel(r"E:\钉钉excel文件\0706\tz_base_20210706_14_55_05.xlsx")  # 读取团长销售月报
-tz_base = need_dtype(dropna_col(df_tz_month_base))
-tz_base.drop_duplicates(subset='团长用户ID').to_sql("tz_base", con=con, if_exists="append", index=False)
 
-df_tz_day_sale = pd.read_excel(r"E:\钉钉excel文件\0706\tz_day_20210706_15_07_11.xlsx")  # 读取团长日报数据
-tz_day_sale = need_dtype(dropna_col(df_tz_day_sale))
-tz_day_sale.to_sql("tz_day_sale", con=con, if_exists="append", index=False)  # 所有的表都以append方式入库,不允许以replace的方式入库
+if __name__ == "__main__":
+    truncate_table(['work_data.tz_month_sale', 'work_data.tz_message',"work_data.tz_day_sale"])  # 传入一个列表,为了不改变原表数据结构,选择清空表
+    read_file(file_name_walk(r"E:\钉钉excel文件\0707"))
